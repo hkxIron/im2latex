@@ -1,0 +1,41 @@
+2019-02-13 22:57:18,592:INFO: Building model...
+2019-02-13 22:57:21,165:INFO: - done.
+2019-02-13 22:57:21,165:INFO: Epoch 1/5
+2019-02-13 22:59:58,018:INFO: Building model...
+2019-02-13 23:00:02,454:INFO: - done.
+2019-02-13 23:00:02,454:INFO: Epoch 1/5
+2019-02-13 23:02:41,849:INFO: Building model...
+2019-02-13 23:02:46,204:INFO: - done.
+2019-02-13 23:02:46,204:INFO: Epoch 1/5
+2019-02-13 23:07:03,817:INFO: Building model...
+2019-02-13 23:07:05,931:INFO: - done.
+2019-02-13 23:07:05,932:INFO: Epoch 1/5
+2019-02-13 23:07:07,853:INFO: - Training:  - 1s - loss: 3.1101 - perplexity: 24.2229 - lr: 0.0010
+2019-02-13 23:07:11,513:INFO: - Eval: BLEU-4 0.00 - EM 0.00 - Edit 1.32 - perplexity -8.92
+2019-02-13 23:07:11,513:INFO: - New best score (-8.92)!
+2019-02-13 23:07:11,800:INFO: - Saved model in results/small/model.weights/
+2019-02-13 23:07:11,800:INFO: - Elapsed time: 5.87, lr: 0.00100
+2019-02-13 23:07:11,800:INFO: Epoch 2/5
+2019-02-13 23:07:12,550:INFO: - Training:  - 0s - loss: 2.0064 - perplexity: 7.5031 - lr: 0.0010
+2019-02-13 23:07:12,869:INFO: - Eval: BLEU-4 0.00 - EM 0.00 - Edit 30.00 - perplexity -6.38
+2019-02-13 23:07:12,869:INFO: - New best score (-6.38)!
+2019-02-13 23:07:13,157:INFO: - Saved model in results/small/model.weights/
+2019-02-13 23:07:13,158:INFO: - Elapsed time: 1.36, lr: 0.00100
+2019-02-13 23:07:13,158:INFO: Epoch 3/5
+2019-02-13 23:07:13,924:INFO: - Training:  - 0s - loss: 1.7673 - perplexity: 5.9877 - lr: 0.0010
+2019-02-13 23:07:17,276:INFO: - Eval: BLEU-4 0.00 - EM 0.00 - Edit 27.78 - perplexity -4.65
+2019-02-13 23:07:17,277:INFO: - New best score (-4.65)!
+2019-02-13 23:07:17,527:INFO: - Saved model in results/small/model.weights/
+2019-02-13 23:07:17,527:INFO: - Elapsed time: 4.37, lr: 0.00100
+2019-02-13 23:07:17,527:INFO: Epoch 4/5
+2019-02-13 23:07:18,277:INFO: - Training:  - 0s - loss: 1.5741 - perplexity: 4.8339 - lr: 0.0010
+2019-02-13 23:07:18,612:INFO: - Eval: BLEU-4 0.00 - EM 0.00 - Edit 38.33 - perplexity -4.42
+2019-02-13 23:07:18,612:INFO: - New best score (-4.42)!
+2019-02-13 23:07:19,267:INFO: - Saved model in results/small/model.weights/
+2019-02-13 23:07:19,267:INFO: - Elapsed time: 1.74, lr: 0.00100
+2019-02-13 23:07:19,267:INFO: Epoch 5/5
+2019-02-13 23:07:20,031:INFO: - Training:  - 0s - loss: 1.4622 - perplexity: 4.3207 - lr: 0.0010
+2019-02-13 23:07:20,339:INFO: - Eval: BLEU-4 0.00 - EM 0.00 - Edit 30.00 - perplexity -4.13
+2019-02-13 23:07:20,339:INFO: - New best score (-4.13)!
+2019-02-13 23:07:20,911:INFO: - Saved model in results/small/model.weights/
+2019-02-13 23:07:20,911:INFO: - Elapsed time: 1.64, lr: 0.00100
