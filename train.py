@@ -8,7 +8,7 @@ from model.utils.general import Config
 from model.utils.text import Vocab
 from model.utils.image import greyscale
 
-
+# 注意:本代码为python3版本
 @click.command()
 @click.option('--data', default="configs/data_small.json",
         help='Path to data json config')

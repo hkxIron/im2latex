@@ -1,4 +1,5 @@
 install-linux:
+	source ~/.bashrc
 	sudo pip install -r requirements.txt
 	sudo apt-get install texlive-latex-base
 	sudo apt-get install texlive-latex-extra

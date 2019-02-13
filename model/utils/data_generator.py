@@ -114,7 +114,7 @@ class DataGenerator(object):
             data_buckets[s] += [(img_path, formula_id)]
 
         # write the rest of the buffer
-        for k, v in data_buckets.iteritems():
+        for k, v in data_buckets.items():
             for (img_path, formula_id) in v:
                 bucketed_dataset += [(img_path, formula_id)]
 
@@ -171,7 +171,7 @@ class DataGenerator(object):
 
         img = imread(self._dir_images + "/" + img_path)
         img = self._img_prepro(img)
-        formula = self._form_prepro(self._get_raw_formula(formula_id))
+        formula =[x for x in self._form_prepro(self._get_raw_formula(formula_id))]
 
         if self._iter_mode == "data":
             inst = (img, formula)
