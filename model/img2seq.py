@@ -34,8 +34,7 @@ class Img2SeqModel(BaseModel):
         self.logger.info("Building model...")
 
         self.encoder = Encoder(self._config)
-        self.decoder = Decoder(self._config, self._vocab.n_tok,
-                self._vocab.id_end)
+        self.decoder = Decoder(self._config, self._vocab.n_tok, self._vocab.id_end)
 
         self._add_placeholders_op()
         self._add_pred_op()
@@ -52,8 +51,7 @@ class Img2SeqModel(BaseModel):
         self.logger.info("Building model...")
 
         self.encoder = Encoder(self._config)
-        self.decoder = Decoder(self._config, self._vocab.n_tok,
-                self._vocab.id_end)
+        self.decoder = Decoder(self._config, self._vocab.n_tok, self._vocab.id_end)
 
         self._add_placeholders_op()
         self._add_pred_op()
@@ -70,21 +68,18 @@ class Img2SeqModel(BaseModel):
         Add placeholder attributes
         """
         # hyper params
-        self.lr = tf.placeholder(tf.float32, shape=(),
-            name='lr')
-        self.dropout = tf.placeholder(tf.float32, shape=(),
-            name='dropout')
-        self.training = tf.placeholder(tf.bool, shape=(),
-            name="training")
+        self.lr = tf.placeholder(tf.float32, shape=(), name='lr')
+        self.dropout = tf.placeholder(tf.float32, shape=(), name='dropout')
+        self.training = tf.placeholder(tf.bool, shape=(), name="training")
 
 
         # input of the graph
-        self.img = tf.placeholder(tf.uint8, shape=(None, None, None, 1),
-            name='img')
-        self.formula = tf.placeholder(tf.int32, shape=(None, None),
-            name='formula')
-        self.formula_length = tf.placeholder(tf.int32, shape=(None, ),
-            name='formula_length')
+        # img:[batch, height, weight, channel=1]
+        self.img = tf.placeholder(tf.uint8, shape=(None, None, None, 1), name='img')
+        # formula:[batch, sequence_length]
+        self.formula = tf.placeholder(tf.int32, shape=(None, None), name='formula')
+        # formula_length:[batch]
+        self.formula_length = tf.placeholder(tf.int32, shape=(None, ), name='formula_length')
 
         # tensorboard
         tf.summary.scalar("lr", self.lr)
@@ -94,7 +89,7 @@ class Img2SeqModel(BaseModel):
         """Returns a dict"""
         img = pad_batch_images(img)
 
-        fd = {
+        feed_dict = {
             self.img: img,
             self.dropout: dropout,
             self.training: training,
@@ -104,19 +99,18 @@ class Img2SeqModel(BaseModel):
             formula, formula_length = pad_batch_formulas(formula,
                     self._vocab.id_pad, self._vocab.id_end)
             # print img.shape, formula.shape
-            fd[self.formula] = formula
-            fd[self.formula_length] = formula_length
+            feed_dict[self.formula] = formula
+            feed_dict[self.formula_length] = formula_length
         if lr is not None:
-            fd[self.lr] = lr
+            feed_dict[self.lr] = lr
 
-        return fd
+        return feed_dict
 
 
     def _add_pred_op(self):
         """Defines self.pred"""
         encoded_img = self.encoder(self.training, self.img, self.dropout)
-        train, test = self.decoder(self.training, encoded_img, self.formula,
-                self.dropout)
+        train, test = self.decoder(self.training, encoded_img, self.formula, self.dropout)
 
         self.pred_train = train
         self.pred_test  = test
@@ -124,17 +118,19 @@ class Img2SeqModel(BaseModel):
 
     def _add_loss_op(self):
         """Defines self.loss"""
-        losses = tf.nn.sparse_softmax_cross_entropy_with_logits(
-            logits=self.pred_train, labels=self.formula)
-
+        # losses:[batch, target_sequence_length]
+        losses = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=self.pred_train, labels=self.formula)
+        # mask:[batch, max_target_sequnce_length]
         mask = tf.sequence_mask(self.formula_length)
-        losses = tf.boolean_mask(losses, mask)
+        # losses_masked: [ num_of_actual_word_count_in_batch ],为一维的数组
+        # 它的shape为一个batch中所有句子的长度之和(除去了padding的元素),每个元素为该句子的ner序列 log(Prob)
+        masked_losses = tf.boolean_mask(losses, mask)
 
         # loss for training
-        self.loss = tf.reduce_mean(losses)
+        self.loss = tf.reduce_mean(masked_losses)
 
         # # to compute perplexity for test
-        self.ce_words = tf.reduce_sum(losses) # sum of CE for each word
+        self.ce_words = tf.reduce_sum(masked_losses) # sum of CrossEntropy for each word
         self.n_words = tf.reduce_sum(self.formula_length) # number of words
 
         # for tensorboard
@@ -223,7 +219,7 @@ class Img2SeqModel(BaseModel):
                 ids_eval = np.expand_dims(ids_eval, axis=1)
 
             elif self._config.decoding == "beam_search":
-                ids_eval = np.transpose(ids_eval, [0, 2, 1])
+                ids_eval = np.transpose(ids_eval, axes=[0, 2, 1])
 
             n_words += n_words_eval
             ce_words += ce_words_eval

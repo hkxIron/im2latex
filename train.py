@@ -20,6 +20,7 @@ from model.utils.image import greyscale
         help='Path to model json config')
 @click.option('--output', default="results/small/",
         help='Dir for results and model weights')
+# 使用click的data, vocab, training, model, output参数
 def main(data, vocab, training, model, output):
     # Load configs
     dir_output = output
@@ -42,8 +43,7 @@ def main(data, vocab, training, model, output):
             form_prepro=vocab.form_prepro)
 
     # Define learning rate schedule
-    n_batches_epoch = ((len(train_set) + config.batch_size - 1) //
-                        config.batch_size)
+    n_batches_epoch = ((len(train_set) + config.batch_size - 1) // config.batch_size)
     lr_schedule = LRSchedule(lr_init=config.lr_init,
             start_decay=config.start_decay*n_batches_epoch,
             end_decay=config.end_decay*n_batches_epoch,

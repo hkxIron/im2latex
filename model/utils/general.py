@@ -92,7 +92,7 @@ class Config():
         Args:
             source: path to json file or dict
         """
-        self.source = source
+        self.source = source # 会将各文件的配置放到__dict__里去, source成员也是其中的一个key
 
         if type(source) is dict:
             self.__dict__.update(source)

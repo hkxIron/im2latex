@@ -24,7 +24,7 @@ class BaseModel(object):
         self.logger = get_logger(self._dir_output + "model.log")
         tf.reset_default_graph() # saveguard if previous model was defined
 
-
+    # 即此函数必须由继承者实现
     def build_train(self, config=None):
         """To overwrite with model-specific logic
 
@@ -156,8 +156,7 @@ class BaseModel(object):
             self.logger.info("Epoch {:}/{:}".format(epoch+1, config.n_epochs))
 
             # epoch
-            score = self._run_epoch(config, train_set, val_set, epoch,
-                    lr_schedule)
+            score = self._run_epoch(config, train_set, val_set, epoch, lr_schedule)
 
             # save weights if we have new best score on eval
             if best_score is None or score >= best_score:

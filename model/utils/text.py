@@ -10,7 +10,8 @@ class Vocab(object):
 
 
     def load_vocab(self):
-        special_tokens = [self.config.unk, self.config.pad, self.config.end]
+        special_tokens = [self.config.unk, self.config.pad, self.config.end] # 为何没有sos?
+        # tok_to_id: Map(token -> id),special_tokens加在dict末尾
         self.tok_to_id = load_tok_to_id(self.config.path_vocab, special_tokens)
         self.id_to_tok = {idx: tok for tok, idx in self.tok_to_id.items()}
         self.n_tok = len(self.tok_to_id)
@@ -39,8 +40,8 @@ def get_form_prepro(vocab, id_unk):
         return vocab[token] if token in vocab else id_unk
 
     def f(formula):
-        formula = formula.strip().split(' ')
-        return map(lambda t: get_token_id(t), formula)
+        formula = formula.strip().split(' ') # formula,由一系列token组成
+        return map(lambda t: get_token_id(t), formula) # 遍历formula的每个元素,执行get_token_id()函数
 
     return f
 
@@ -131,14 +132,13 @@ def pad_batch_formulas(formulas, id_pad, id_end, max_len=None):
     """
     if max_len is None:
         max_len = max(map(lambda x: len(x), formulas))
-
-    batch_formulas = id_pad * np.ones([len(formulas), max_len+1],
-            dtype=np.int32)
+    # [batch, max_len+1]
+    batch_formulas = id_pad * np.ones([len(formulas), max_len+1], dtype=np.int32)
+    # [batch]
     formula_length = np.zeros(len(formulas), dtype=np.int32)
     for idx, formula in enumerate(formulas):
-        batch_formulas[idx, :len(formula)] = np.asarray(formula,
-                dtype=np.int32)
-        batch_formulas[idx, len(formula)]  = id_end
+        batch_formulas[idx, :len(formula)] = np.asarray(formula, dtype=np.int32)
+        batch_formulas[idx, len(formula)]  = id_end # formula为decoder的输入,需要加一个EOS
         formula_length[idx] = len(formula) + 1
 
     return batch_formulas, formula_length
