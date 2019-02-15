@@ -22,8 +22,7 @@ class GreedyDecoderCell(object):
     @property
     def output_dtype(self):
         """for the custom dynamic_decode for the TensorArray of results"""
-        return DecoderOutput(logits=self._attention_cell.output_dtype,
-                ids=tf.int32)
+        return DecoderOutput(logits=self._attention_cell.output_dtype, ids=tf.int32)
 
 
     @property
@@ -39,7 +38,7 @@ class GreedyDecoderCell(object):
 
     def initial_inputs(self):
         """Returns initial inputs for the decoder (start token)"""
-        return tf.tile(tf.expand_dims(self._start_token, 0),
+        return tf.tile(tf.expand_dims(self._start_token, axis=0),
             multiples=[self._batch_size, 1])
 
 
@@ -61,8 +60,7 @@ class GreedyDecoderCell(object):
         # create new state of decoder
         new_output = DecoderOutput(logits, new_ids)
 
-        new_finished = tf.logical_or(finished, tf.equal(new_ids,
-                self._end_token))
+        new_finished = tf.logical_or(x=finished, y=tf.equal(new_ids, self._end_token))
 
         return (new_output, new_state, new_embedding, new_finished)
 

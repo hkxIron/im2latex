@@ -37,41 +37,48 @@ class Decoder(object):
                 - pred.test.ids, shape = (?, config.max_length_formula)
 
         """
-        dim_embeddings = self._config.attn_cell_config.get("dim_embeddings")
-        E = tf.get_variable("E", initializer=embedding_initializer(),
-                shape=[self._n_tok, dim_embeddings], dtype=tf.float32)
+        # scalar:embedding的维度
+        embedding_dim = self._config.attn_cell_config.get("embedding_dim") # dim=50
+        # embedding: [vocab_size, embedding_size]
+        embedding_matrix = tf.get_variable("embedding_matrix",
+                                           initializer=embedding_initializer(),
+                                           shape=[self._n_tok, embedding_dim],
+                                           dtype=tf.float32)
         # 作者果然是为start_token单独申请了变量
-        start_token = tf.get_variable("start_token", dtype=tf.float32,
-                shape=[dim_embeddings], initializer=embedding_initializer())
-
+        start_token = tf.get_variable("start_token",
+                                      dtype=tf.float32,
+                                      shape=[embedding_dim],
+                                      initializer=embedding_initializer())
         batch_size = tf.shape(img)[0]
 
         # training
         with tf.variable_scope("attn_cell", reuse=False):
+            # formula:[batch, target_sequence_length]
+            # embedding_matrix: [vocab_size, embedding_size]
             # decoder_input_embeddings: [batch, target_sequence_length+1, embedding_size]
-            decoder_input_embeddings = get_embeddings(formula, E, dim_embeddings, start_token, batch_size)
+            decoder_input_embeddings = get_embeddings(formula, embedding_matrix, embedding_dim, start_token, batch_size)
             # img: [batch, height, weight, channel]
             attn_meca = AttentionMechanism(img, self._config.attn_cell_config["dim_e"])
-            recu_cell = LSTMCell(num_units=self._config.attn_cell_config["num_units"])
-            attn_cell = AttentionCell(recu_cell, attn_meca, dropout, self._config.attn_cell_config, self._n_tok)
+            rnn_cell = LSTMCell(num_units=self._config.attn_cell_config["num_units"])
+            attn_cell = AttentionCell(rnn_cell, attn_meca, dropout, self._config.attn_cell_config, self._n_tok)
 
-            train_outputs, _ = tf.nn.dynamic_rnn(attn_cell, decoder_input_embeddings,
-                    initial_state=attn_cell.initial_state())
+            # decoder_input_embeddings: [batch, target_sequence_length+1, embedding_size]
+            # train_outputs: [batch, target_sequence_length+1, hidden_size]
+            # _: [hidden=[batch, hidden_size], cell=[batch, hidden_size]]
+            train_outputs, _ = tf.nn.dynamic_rnn(cell=attn_cell,
+                                                 inputs=decoder_input_embeddings,
+                                                 initial_state=attn_cell.initial_state())
 
-        # decoding
-        with tf.variable_scope("attn_cell", reuse=True):
-            attn_meca = AttentionMechanism(img=img,
-                    dim_e=self._config.attn_cell_config["dim_e"],
-                    tiles=self._tiles)
-            recu_cell = LSTMCell(self._config.attn_cell_config["num_units"],
-                    reuse=True)
-            attn_cell = AttentionCell(recu_cell, attn_meca, dropout,
-                    self._config.attn_cell_config, self._n_tok)
+        # inference(decoding)
+        with tf.variable_scope("attn_cell", reuse=True):  # 注意:reuse=True
+            attn_meca = AttentionMechanism(img=img, dim_e=self._config.attn_cell_config["dim_e"], tiles=self._tiles)
+            rnn_cell = LSTMCell(num_units=self._config.attn_cell_config["num_units"], reuse=True)
+            attn_cell = AttentionCell(rnn_cell, attn_meca, dropout, self._config.attn_cell_config, self._n_tok)
             if self._config.decoding == "greedy":
-                decoder_cell = GreedyDecoderCell(E, attn_cell, batch_size,
-                        start_token, id_end) # 此处id_end并非错误
+                # embedding: [vocab_size, embedding_size]
+                decoder_cell = GreedyDecoderCell(embedding_matrix, attn_cell, batch_size, start_token, self._id_end)
             elif self._config.decoding == "beam_search":
-                decoder_cell = BeamSearchDecoderCell(E, attn_cell, batch_size,
+                decoder_cell = BeamSearchDecoderCell(embedding_matrix, attn_cell, batch_size,
                         start_token, self._id_end, self._config.beam_size,
                         self._config.div_gamma, self._config.div_prob)
 
